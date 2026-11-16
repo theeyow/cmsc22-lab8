@@ -1,6 +1,7 @@
 import java.util.List;
 import java.util.Collections;
 import java.util.Random;
+import java.util.ArrayList;
 
 public class Creature {
     //create type, HP, attack, speed moves, status, and potions
@@ -25,7 +26,7 @@ public class Creature {
         this.hp = maxHp;                // hp starts at maxHp
         this.attack = attack;
         this.speed = speed;
-        this.moves = moves;
+        this.moves = new ArrayList<>(moves);
         this.status = new NormalState();         //WHAT CHANGD? Replaced string assignment ("NORMAL") with the NormalState state object 
                                                 // default status
         this.potions = potions;                    

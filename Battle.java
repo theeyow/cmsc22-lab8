@@ -2,63 +2,86 @@ import java.util.Random;
 
 // plays the rounds, applies moves, types and statuses, and prints the result.
 class Battle {
+    // stores the two creatures participating in the battle
     private Creature player;
     private Creature rival;
-    private String difficulty; // "EASY" or "HARD"
+
+    // WHAT CHANGED? - replaced String difficulty with RivalStrategy to implement the strategy pattern
+                  // - allows Battle to use different rival decision making strategies without knowing specific difficulty implementation 
+    private RivalStrategy rivalStrategy; 
+
     private Random random;
     private int round = 0;
 
-    Battle(Creature player, Creature rival, String difficulty, Random random) {
+    // constructor for initializing the battle properties
+    Battle(Creature player, Creature rival, RivalStrategy rivalStrategy, Random random) {
         this.player = player;
         this.rival = rival;
-        this.difficulty = difficulty;
+        this.rivalStrategy = rivalStrategy;
         this.random = random;
     }
 
+    // checks whether either creature has fainted
     public boolean isOver() {
         return player.isFainted() || rival.isFainted();
     }
 
+    // displays current round and both creatures status
     public void showStatus() {
         System.out.println("\n--- Round " + (round + 1) + " ---");
         printCreature(rival);
         printCreature(player);
     }
 
+    // displays a creatures information and HP bar
     private void printCreature(Creature creature) {
-        int filled = creature.hp * 10 / creature.maxHp;
-        if (creature.hp > 0 && filled == 0) {
+        // WHAT CHANGED? uses getters instead of directly accessing creature fields because they are now private
+        int filled = creature.getHp() * 10 / creature.getMaxHp();
+
+        if (creature.getHp() > 0 && filled == 0) {
             filled = 1;
         }
         String bar = "";
         for (int i = 0; i < 10; i++) {
             bar += (i < filled) ? "#" : "-";
         }
+
         String statusText = "";
-        if (creature.status.equals("BURNED")) {
+
+        // WHAT CHANGED?? checks the active StatusState object using instanceof instead of comparing status Strings
+        if (creature.getStatus() instanceof BurnedState) {
             statusText = " (burned)";
-        } else if (creature.status.equals("ASLEEP")) {
+        } else if (creature.getStatus() instanceof AsleepState) {
             statusText = " (asleep)";
-        } else if (creature.status.equals("PARALYZED")) {
+        } else if (creature.getStatus() instanceof ParalyzedState) {
             statusText = " (paralyzed)";
         }
-        System.out.println(creature.name + " [" + creature.type + "] HP " + creature.hp + "/" + creature.maxHp
+        System.out.println(creature.getName() + " [" + creature.getType() + "] HP " + creature.getHp() + "/" + creature.getMaxHp()
                 + " [" + bar + "]" + statusText);
     }
 
+    // displays the players available moves and potion count
     public void showMoveMenu() {
-        System.out.println("What will " + player.name + " do?");
-        for (int i = 0; i < player.moves.length; i++) {
-            String move = player.moves[i];
-            System.out.println("  " + (i + 1) + ". " + move + " (" + getMoveType(move) + ", power " + getPower(move) + ")");
+        System.out.println("What will " + player.getName() + " do?");
+        // WHAT CHANGED?? uses a list of Move objects instead of a String array
+        // each Move object stores its own name, type, and power
+        for (int i = 0; i < player.getMoves().size(); i++) {
+            Move move = player.getMoves().get(i);
+
+            System.out.println("  " + (i + 1) + ". " + move.getName()
+                + " (" + move.getType() + ", power " + move.getPower() + ")");
         }
-        System.out.println("  4. Use potion (" + player.potions + " left)");
+        System.out.println("  4. Use potion (" + player.getPotions() + " left)");
     }
 
     // choice: 0 to 2 is one of the player's moves, 3 is a potion.
     public void playRound(int choice) {
         round++;
+
+        // gets the rival's action through its assigned strategy
         int rivalChoice = chooseRivalAction();
+
+        // determines which creature acts first based on effective speed
         if (getSpeed(player) >= getSpeed(rival)) {
             takeAction(player, rival, choice);
             if (!isOver()) {
@@ -70,77 +93,68 @@ class Battle {
                 takeAction(player, rival, choice);
             }
         }
+        // applies each creature's end-of-turn status effect
         if (!isOver()) {
             endOfTurn(player);
             endOfTurn(rival);
         }
     }
 
+    // displays the final battle result
     public void printResult() {
         System.out.println();
         printCreature(rival);
         printCreature(player);
+
         if (player.isFainted()) {
-            System.out.println("\n" + player.name + " fainted. You lost the battle!");
+            System.out.println("\n" + player.getName() + " fainted. You lost the battle!");
         } else {
-            System.out.println("\n" + rival.name + " fainted. You won the battle!");
+            System.out.println("\n" + rival.getName() + " fainted. You won the battle!");
         }
     }
 
+    // handles the action selected by a creature
     private void takeAction(Creature actor, Creature target, int choice) {
-        if (!canAct(actor)) {
+        // WHAT CHANGED? delegates the canAct check to the active StatusState through Creature instead of checking each status in Battle
+        if (!actor.canAct(random)) {
             return;
         }
         if (choice == 3) {
             usePotion(actor);
         } else {
-            useMove(actor, target, actor.moves[choice]);
+            useMove(actor, target, actor.getMoves().get(choice));
         }
     }
 
-    private boolean canAct(Creature creature) {
-        if (creature.status.equals("ASLEEP")) {
-            // a 1 in 3 chance to wake up each turn.
-            if (random.nextInt(3) == 0) {
-                creature.status = "NORMAL";
-                System.out.println(creature.name + " woke up!");
-                return true;
-            }
-            System.out.println(creature.name + " is fast asleep.");
-            return false;
-        } else if (creature.status.equals("PARALYZED")) {
-            // a 1 in 4 chance of not being able to move.
-            if (random.nextInt(4) == 0) {
-                System.out.println(creature.name + " is paralyzed and can't move!");
-                return false;
-            }
-        }
-        return true;
-    }
-
+    // handles potion usage
     private void usePotion(Creature creature) {
-        if (creature.potions == 0) {
-            System.out.println(creature.name + " has no potions left!");
+        // WHAT CHANGED? potion usage is the handled by Creature's usePotion() method instead of directly 
+            // modifying its HP and potion count here
+        if (!creature.usePotion()) {
+            System.out.println(creature.getName() + " has no potions left!");
             return;
         }
-        creature.potions--;
-        creature.hp = Math.min(creature.maxHp, creature.hp + 30);
-        System.out.println(creature.name + " used a potion and recovered HP. (" + creature.potions + " left)");
+
+        System.out.println(creature.getName() + " used a potion and recovered HP. (" + creature.getPotions() + " left)");
     }
 
-    private void useMove(Creature attacker, Creature target, String move) {
-        System.out.println(attacker.name + " used " + move + "!");
-        int power = getPower(move);
+    // handles move execution and damage calculation
+    private void useMove(Creature attacker, Creature target, Move move) {
+        System.out.println(attacker.getName() + " used " + move.getName() + "!");
+        int power = move.getPower();
         if (power > 0) {
-            double multiplier = getMultiplier(getMoveType(move), target.type);
-            double attackStat = attacker.attack;
-            if (attacker.status.equals("BURNED")) {
-                attackStat = attackStat / 2;
-            }
-            // damage = power x attack / 30, then doubled or halved by the type matchup.
-            int damage = (int) (power * attackStat / 30 * multiplier);
-            target.hp = Math.max(0, target.hp - damage);
+            // WHAT CHANGED? gets the move's power and type directly from the Move object instead of using separate helper method inside the Battle
+            double multiplier = TypeEffectiveness.getMultiplier(move.getType(), target.getType());
+            // gets the attack value after applying the current status effect
+            int attackStat = attacker.getEffectiveAttack();
+
+            //damage = power x attack / 30, adjusted by type effectiveness
+            int damage = (int)(power * (double)attackStat / 30 * multiplier);
+
+            target.takeDamage(damage);
+
             System.out.println("  It dealt " + damage + " damage.");
+
             if (multiplier > 1) {
                 System.out.println("  It's super effective!");
             } else if (multiplier < 1) {
@@ -149,115 +163,44 @@ class Battle {
         }
         applyEffect(move, target);
         if (target.isFainted()) {
-            System.out.println(target.name + " fainted!");
+            System.out.println(target.getName() + " fainted!");
         }
     }
 
-    private void applyEffect(String move, Creature target) {
-        if (target.isFainted() || !target.status.equals("NORMAL")) {
+    // apply the status effect of a move
+    private void applyEffect(Move move, Creature target) {
+        // only applies an effect if the target has not fainted and is currently in its NormalState
+        if (target.isFainted() || !(target.getStatus() instanceof NormalState)) {
             return;
         }
         // ember has a 30% chance to burn. Lullaby and Spore Cloud always work on a creature with no status.
-        if (move.equals("Ember") && random.nextInt(100) < 30) {
-            target.status = "BURNED";
-            System.out.println("  " + target.name + " was burned!");
-        } else if (move.equals("Lullaby")) {
-            target.status = "ASLEEP";
-            System.out.println("  " + target.name + " fell asleep!");
-        } else if (move.equals("Spore Cloud")) {
-            target.status = "PARALYZED";
-            System.out.println("  " + target.name + " is paralyzed!");
+        if (move.getName().equals("Ember") && random.nextInt(100) < 30) {
+            target.setStatus(new BurnedState());
+            System.out.println("  " + target.getName() + " was burned!");
+        } else if (move.getName().equals("Lullaby")) {
+            target.setStatus(new AsleepState());
+            System.out.println("  " + target.getName() + " fell asleep!");
+        } else if (move.getName().equals("Spore Cloud")) {
+            target.setStatus(new ParalyzedState());
+            System.out.println("  " + target.getName() + " is paralyzed!");
         }
     }
 
+    // WHAT CHANGED? delegates end of turn behavior to the active StatusState through Creature instead of handling each status on Battle
     private void endOfTurn(Creature creature) {
-        if (creature.status.equals("BURNED")) {
-            creature.hp = Math.max(0, creature.hp - 6);
-            System.out.println(creature.name + " is hurt by its burn. (-6 HP)");
-            if (creature.isFainted()) {
-                System.out.println(creature.name + " fainted!");
-            }
-        }
+        creature.endOfTurn();
     }
 
+    // gets the creature's effective speed after applying its current status
     private int getSpeed(Creature creature) {
-        if (creature.status.equals("PARALYZED")) {
-            return creature.speed / 2;
-        }
-        return creature.speed;
+        return creature.getEffectiveSpeed();
     }
 
-    // returns the rival's choice in the same form as the player's: 0 to 2 for a move, 3 for a potion.
+    // WHAT CHANGED? removed the difficulty based if else logic from Battle
+    // the selected RivalStategy now decides which action the rival performs
+    // follows strategy pattern
     private int chooseRivalAction() {
-        if (difficulty.equals("EASY")) {
-            return random.nextInt(3);
-        } else if (difficulty.equals("HARD")) {
-            if (rival.hp < 30 && rival.potions > 0) {
-                return 3;
-            }
-            int best = 0;
-            double bestScore = -1;
-            for (int i = 0; i < rival.moves.length; i++) {
-                String move = rival.moves[i];
-                double score = getPower(move) * getMultiplier(getMoveType(move), player.type);
-                if (getPower(move) == 0) {
-                    // a status move is worth using only if the player has no status yet.
-                    score = player.status.equals("NORMAL") ? 25 : 0;
-                }
-                if (score > bestScore) {
-                    bestScore = score;
-                    best = i;
-                }
-            }
-            return best;
-        }
-        return 0;
+        return rivalStrategy.chooseAction(rival, player, random);
     }
 
-    private int getPower(String move) {
-        if (move.equals("Ember")) {
-            return 40;
-        } else if (move.equals("Wing Slash")) {
-            return 35;
-        } else if (move.equals("Sun Flare")) {
-            return 60;
-        } else if (move.equals("Water Gun")) {
-            return 40;
-        } else if (move.equals("Tail Slap")) {
-            return 30;
-        } else if (move.equals("Vine Whip")) {
-            return 40;
-        } else if (move.equals("Smash")) {
-            return 45;
-        }
-        return 0;
-    }
-
-    private String getMoveType(String move) {
-        if (move.equals("Ember") || move.equals("Sun Flare")) {
-            return "FIRE";
-        } else if (move.equals("Water Gun") || move.equals("Lullaby")) {
-            return "WATER";
-        } else if (move.equals("Vine Whip") || move.equals("Spore Cloud")) {
-            return "GRASS";
-        }
-        return "NORMAL";
-    }
-
-    private double getMultiplier(String moveType, String targetType) {
-        if (moveType.equals("FIRE") && targetType.equals("GRASS")) {
-            return 2.0;
-        } else if (moveType.equals("FIRE") && targetType.equals("WATER")) {
-            return 0.5;
-        } else if (moveType.equals("WATER") && targetType.equals("FIRE")) {
-            return 2.0;
-        } else if (moveType.equals("WATER") && targetType.equals("GRASS")) {
-            return 0.5;
-        } else if (moveType.equals("GRASS") && targetType.equals("WATER")) {
-            return 2.0;
-        } else if (moveType.equals("GRASS") && targetType.equals("FIRE")) {
-            return 0.5;
-        }
-        return 1.0;
-    }
 }
