@@ -131,8 +131,17 @@ class Battle {
         if (target.isFainted() || !(target.getStatus() instanceof NormalState)) {
             return;
         }
-        
-        printEvent.effectResult(move, target, random);
+        // ember has a 30% chance to burn. Lullaby and Spore Cloud always work on a creature with no status.
+        if (move.getName().equals("Ember") && random.nextInt(100) < 30) {
+            target.setStatus(new BurnedState());
+            System.out.println("  " + target.getName() + " was burned!");
+        } else if (move.getName().equals("Lullaby")) {
+            target.setStatus(new AsleepState());
+            System.out.println("  " + target.getName() + " fell asleep!");
+        } else if (move.getName().equals("Spore Cloud")) {
+            target.setStatus(new ParalyzedState());
+            System.out.println("  " + target.getName() + " is paralyzed!");
+        }
     }
 
     // WHAT CHANGED? delegates end of turn behavior to the active StatusState through Creature instead of handling each status on Battle
