@@ -8,8 +8,9 @@ import referentials.Moves;
 public class HardStrategy implements RivalStrategy{
     @Override
     public int chooseAction(Creature rival, Creature player, Random random){
+        int hp_threshold = 30;
         // use a potion if the rival's HP is below 30 and it still has potions
-        if (rival.getHp() < 30 && rival.getPotions() > 0){
+        if (rival.getHp() < hp_threshold && rival.getPotions() > 0){
             return 3;       // action 3 represents using a potion
         }
 
