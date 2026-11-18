@@ -30,6 +30,6 @@ class CreatureFactory{
         }
 
         // returns null is the given name does not match any available creature
-        return null;
+        throw new IllegalArgumentException("Tried to create invalid creature");
     }
 }
