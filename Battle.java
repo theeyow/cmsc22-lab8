@@ -14,6 +14,8 @@ class Battle {
     private Random random;
     private int round = 0;
 
+    private BattlePrint printEvent = new BattlePrint();
+
     // constructor for initializing the battle properties
     Battle(Creature player, Creature rival, RivalStrategy rivalStrategy, Random random) {
         this.player = player;
@@ -27,52 +29,16 @@ class Battle {
         return player.isFainted() || rival.isFainted();
     }
 
-    // displays current round and both creatures status
-    public void showStatus() {
-        System.out.println("\n--- Round " + (round + 1) + " ---");
-        printCreature(rival);
-        printCreature(player);
+    public void showStatus(){
+        printEvent.showStatus(player, rival, round);
     }
 
-    // displays a creatures information and HP bar
-    private void printCreature(Creature creature) {
-        // WHAT CHANGED? uses getters instead of directly accessing creature fields because they are now private
-        int filled = creature.getHp() * 10 / creature.getMaxHp();
-
-        if (creature.getHp() > 0 && filled == 0) {
-            filled = 1;
-        }
-        String bar = "";
-        for (int i = 0; i < 10; i++) {
-            bar += (i < filled) ? "#" : "-";
-        }
-
-        String statusText = "";
-
-        // WHAT CHANGED?? checks the active StatusState object using instanceof instead of comparing status Strings
-        if (creature.getStatus() instanceof BurnedState) {
-            statusText = " (burned)";
-        } else if (creature.getStatus() instanceof AsleepState) {
-            statusText = " (asleep)";
-        } else if (creature.getStatus() instanceof ParalyzedState) {
-            statusText = " (paralyzed)";
-        }
-        System.out.println(creature.getName() + " [" + creature.getType() + "] HP " + creature.getHp() + "/" + creature.getMaxHp()
-                + " [" + bar + "]" + statusText);
+    public void printCreature(){
+        printEvent.printCreature(player);
     }
 
-    // displays the players available moves and potion count
-    public void showMoveMenu() {
-        System.out.println("What will " + player.getName() + " do?");
-        // WHAT CHANGED?? uses a list of Move objects instead of a String array
-        // each Move object stores its own name, type, and power
-        for (int i = 0; i < player.getMoves().length; i++) {
-            Moves move = player.getMoves()[i];
-
-            System.out.println("  " + (i + 1) + ". " + move.getName()
-                + " (" + move.getType() + ", power " + move.getPower() + ")");
-        }
-        System.out.println("  4. Use potion (" + player.getPotions() + " left)");
+    public void showMoveMenu(){
+        printEvent.showMoveMenu(player);
     }
 
     // choice: 0 to 2 is one of the player's moves, 3 is a potion.
@@ -100,18 +66,9 @@ class Battle {
             endOfTurn(rival);
         }
     }
-
-    // displays the final battle result
-    public void printResult() {
-        System.out.println();
-        printCreature(rival);
-        printCreature(player);
-
-        if (player.isFainted()) {
-            System.out.println("\n" + player.getName() + " fainted. You lost the battle!");
-        } else {
-            System.out.println("\n" + rival.getName() + " fainted. You won the battle!");
-        }
+    
+    public void printResult(){
+        printEvent.printResult(player, rival);
     }
 
     // handles the action selected by a creature
@@ -174,17 +131,8 @@ class Battle {
         if (target.isFainted() || !(target.getStatus() instanceof NormalState)) {
             return;
         }
-        // ember has a 30% chance to burn. Lullaby and Spore Cloud always work on a creature with no status.
-        if (move.getName().equals("Ember") && random.nextInt(100) < 30) {
-            target.setStatus(new BurnedState());
-            System.out.println("  " + target.getName() + " was burned!");
-        } else if (move.getName().equals("Lullaby")) {
-            target.setStatus(new AsleepState());
-            System.out.println("  " + target.getName() + " fell asleep!");
-        } else if (move.getName().equals("Spore Cloud")) {
-            target.setStatus(new ParalyzedState());
-            System.out.println("  " + target.getName() + " is paralyzed!");
-        }
+        
+        printEvent.effectResult(move, target, random);
     }
 
     // WHAT CHANGED? delegates end of turn behavior to the active StatusState through Creature instead of handling each status on Battle
