@@ -1,32 +1,32 @@
-import java.util.List;
-import java.util.Collections;
 import java.util.Random;
-import java.util.ArrayList;
+
+import referentials.Types;
+import referentials.Moves;
 
 public class Creature {
     //create type, HP, attack, speed moves, status, and potions
     //WHAT CHANGED? encapsulation, converted package private fields to private for proper encapsulation
     private String name;
-    private String type;
+    private Types type;
     private int maxHp;
     private int hp;
     private int attack;
     private int speed;
-    private List<Move> moves;       //WHAT CHANGED? changed String[] moves to List<Move> so each move retains its own power and type propertie
-    private StatusState status;     //WHAT CHANGED? Changed String status to StatusState interface to implement the state design pattern
+    private Moves[] moves;       
+    private StatusState status; 
                                     //encapsulates status behaviors (burned, asleep, paralyzed)
     private int potions;            //starting number of potions to be used
 
 
     // constructor for intializiing the creature properties
-    public Creature(String name, String type, int maxHp, int attack, int speed, List<Move> moves, int potions){
+    public Creature(String name, Types type, int maxHp, int attack, int speed, Moves[] moves, int potions){
         this.name = name;
         this.type = type;
         this.maxHp = maxHp;
         this.hp = maxHp;                // hp starts at maxHp
         this.attack = attack;
         this.speed = speed;
-        this.moves = new ArrayList<>(moves);
+        this.moves = moves;
         this.status = new NormalState();         //WHAT CHANGD? Replaced string assignment ("NORMAL") with the NormalState state object 
                                                 // default status
         this.potions = potions;                    
@@ -38,7 +38,7 @@ public class Creature {
         return name;
     }
 
-    public String getType(){
+    public Types getType(){
         return type;
     }
     
@@ -58,8 +58,8 @@ public class Creature {
         return speed;
     }
 
-    public List<Move> getMoves(){
-        return Collections.unmodifiableList(moves);
+    public Moves[] getMoves(){
+        return moves;
     }
 
     public StatusState getStatus(){

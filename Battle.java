@@ -1,4 +1,5 @@
 import java.util.Random;
+import referentials.Moves;
 
 // plays the rounds, applies moves, types and statuses, and prints the result.
 class Battle {
@@ -65,8 +66,8 @@ class Battle {
         System.out.println("What will " + player.getName() + " do?");
         // WHAT CHANGED?? uses a list of Move objects instead of a String array
         // each Move object stores its own name, type, and power
-        for (int i = 0; i < player.getMoves().size(); i++) {
-            Move move = player.getMoves().get(i);
+        for (int i = 0; i < player.getMoves().length; i++) {
+            Moves move = player.getMoves()[i];
 
             System.out.println("  " + (i + 1) + ". " + move.getName()
                 + " (" + move.getType() + ", power " + move.getPower() + ")");
@@ -122,7 +123,7 @@ class Battle {
         if (choice == 3) {
             usePotion(actor);
         } else {
-            useMove(actor, target, actor.getMoves().get(choice));
+            useMove(actor, target, actor.getMoves()[choice]);
         }
     }
 
@@ -139,7 +140,7 @@ class Battle {
     }
 
     // handles move execution and damage calculation
-    private void useMove(Creature attacker, Creature target, Move move) {
+    private void useMove(Creature attacker, Creature target, Moves move) {
         System.out.println(attacker.getName() + " used " + move.getName() + "!");
         int power = move.getPower();
         if (power > 0) {
@@ -168,7 +169,7 @@ class Battle {
     }
 
     // apply the status effect of a move
-    private void applyEffect(Move move, Creature target) {
+    private void applyEffect(Moves move, Creature target) {
         // only applies an effect if the target has not fainted and is currently in its NormalState
         if (target.isFainted() || !(target.getStatus() instanceof NormalState)) {
             return;

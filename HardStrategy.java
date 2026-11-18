@@ -1,4 +1,5 @@
 import java.util.Random;
+import referentials.Moves;
 
 // ---- applied strategy pattern: hard difficulty behavior ----
 // WHAT CHANGED? separated rival's decision making logic from Battle.java into its own strategy class
@@ -16,8 +17,8 @@ public class HardStrategy implements RivalStrategy{
         double highestScore = -1;
 
         // examine all available moves to find the one with the highest score
-        for(int i = 0; i < rival.getMoves().size(); i++){
-            Move move = rival.getMoves().get(i);
+        for(int i = 0; i < rival.getMoves().length; i++){
+            Moves move = rival.getMoves()[i];
 
             //calculate move's score based on its power and type effectiveness
             double score = move.getPower() * TypeEffectiveness.getMultiplier(move.getType(), player.getType());

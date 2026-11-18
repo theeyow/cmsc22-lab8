@@ -9,7 +9,7 @@ public class EasyStrategy implements RivalStrategy{
     public int chooseAction(Creature rival, Creature player, Random random){
         // randomly selects one of the rival's available moves
         // nextInt() generates an index from 0 up to (but not including) the number of moves
-        return random.nextInt(rival.getMoves().size());
+        return random.nextInt(rival.getMoves().length);
 
     }
 
