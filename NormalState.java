@@ -11,7 +11,7 @@ public class NormalState implements StatusState{
     }
 
     @Override
-    public int getModifiedAttack(int attack){
+    public double getModifiedAttack(int attack){
         return attack;      // attack remains unchanged when the creature is in its normal state
     }
 

@@ -10,8 +10,8 @@ public class BurnedState implements StatusState{
     }
 
     @Override
-    public int getModifiedAttack(int attack){
-        return attack / 2;      // burned creatures deal half their normal attack
+    public double getModifiedAttack(int attack){
+        return attack / 2.0;      // burned creatures deal half their normal attack
     }
 
     // checks whethere a creature can perform its action

@@ -1,5 +1,4 @@
 import java.util.Random;
-
 import referentials.Moves;
 
 public class BattleActions {
@@ -21,10 +20,10 @@ public class BattleActions {
             // WHAT CHANGED? gets the move's power and type directly from the Move object instead of using separate helper method inside the Battle
             double multiplier = TypeEffectiveness.getMultiplier(move.getType(), target.getType());
             // gets the attack value after applying the current status effect
-            int attackStat = attacker.getEffectiveAttack();
+            double attackStat = attacker.getEffectiveAttack();
 
             //damage = power x attack / 30, adjusted by type effectiveness
-            int damage = (int)(power * (double)attackStat / 30 * multiplier);
+            int damage = (int)(power * attackStat / 30 * multiplier);
 
             target.takeDamage(damage);
 

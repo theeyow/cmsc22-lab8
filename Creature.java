@@ -1,7 +1,6 @@
 import java.util.Random;
-
-import referentials.Types;
 import referentials.Moves;
+import referentials.Types;
 
 public class Creature {
     //create type, HP, attack, speed moves, status, and potions
@@ -16,7 +15,6 @@ public class Creature {
     private StatusState status; 
                                     //encapsulates status behaviors (burned, asleep, paralyzed)
     private int potions;            //starting number of potions to be used
-
 
     // constructor for intializiing the creature properties
     public Creature(String name, Types type, int maxHp, int attack, int speed, Moves[] moves, int potions){
@@ -118,7 +116,7 @@ public class Creature {
     }
 
     // calculates effective attack adjusted by current status
-    public int getEffectiveAttack(){
+    public double getEffectiveAttack(){
         return status.getModifiedAttack(this.attack);
     }
 

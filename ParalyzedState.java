@@ -11,7 +11,7 @@ public class ParalyzedState implements StatusState{
     }
 
     @Override
-    public int getModifiedAttack(int attack){
+    public double getModifiedAttack(int attack){
         return attack;      // attack remains unchanged while paralyzed
     }
 

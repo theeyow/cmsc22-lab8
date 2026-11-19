@@ -10,7 +10,7 @@ public class AsleepState implements StatusState{
     }
 
     @Override
-    public int getModifiedAttack(int attack){
+    public double getModifiedAttack(int attack){
         return attack;          // sleeping does not modify attack
     }
 
