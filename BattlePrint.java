@@ -23,7 +23,7 @@ public class BattlePrint {
 
         String statusText = "";
 
-        // WHAT CHANGED?? checks the active StatusState object using instanceof instead of comparing status Strings
+        // checks the active StatusState object using instanceof instead of comparing status Strings
         if (creature.getStatus() instanceof BurnedState) {
             statusText = " (burned)";
         } else if (creature.getStatus() instanceof AsleepState) {
@@ -38,8 +38,7 @@ public class BattlePrint {
    // displays the players available moves and potion count
     public void showMoveMenu(Creature player) {
         System.out.println("What will " + player.getName() + " do?");
-        // WHAT CHANGED?? uses a list of Move objects instead of a String array
-        // each Move object stores its own name, type, and power
+        // iterates through moveset defined in creature creation. and potions
         for (int i = 0; i < player.getMoves().length; i++) {
             Moves move = player.getMoves()[i];
 
