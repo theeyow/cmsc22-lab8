@@ -21,13 +21,19 @@ public class Main {
                     + ", Attack " + c.getAttack() + ", Speed " + c.getSpeed());
         }
         // creates the player's creature based on the users choice 
-        Creature player = CreatureFactory.create(names[askNumber("Choose >> ", names.length) - 1]);
+        int playerCreatureChoice = askNumber("Choose >> ", names.length) - 1;
+        Creature player = CreatureFactory.create(names[playerCreatureChoice]);
 
         // randomly selects a rival that is different from the players creature
         Creature rival;
-        do {
-            rival = CreatureFactory.create(names[random.nextInt(names.length)]);
-        } while (rival.getName().equals(player.getName()));
+        int creatureChoices = names.length - 1;
+
+        int rivalCreatureChoice = random.nextInt(creatureChoices);
+        if (rivalCreatureChoice == playerCreatureChoice){
+            rivalCreatureChoice++;
+        }
+
+        rival = CreatureFactory.create(names[rivalCreatureChoice]);
 
         // stores the available difficulty levels
         String[] levels = {"EASY", "HARD"};
