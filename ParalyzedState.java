@@ -1,9 +1,5 @@
 import java.util.Random;
 
-// ---- apply state pattern: behavior when the creature is paralyzed ----
-// WHAT CHANGED? separated the paralyzed related conditions and bahaviors from Battle.java into its own state class
-// allows the creature's state to handle its own effects
-
 public class ParalyzedState implements StatusState{
     @Override
     public int getModifiedSpeed(int speed){

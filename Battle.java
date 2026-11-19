@@ -74,7 +74,7 @@ class Battle {
 
     // handles the action selected by a creature
     private void takeAction(Creature actor, Creature target, int choice) {
-        // WHAT CHANGED? delegates the canAct check to the active StatusState through Creature instead of checking each status in Battle
+        // StatusState checks canAct through Creature 
         if (!actor.canAct(random)) {
             return;
         }
@@ -95,7 +95,7 @@ class Battle {
         actionEvent.useMove(attacker, target, move, random);
     }
 
-    // WHAT CHANGED? delegates end of turn behavior to the active StatusState through Creature instead of handling each status on Battle
+    // StatusState implementations handle end of turn events
     private void endOfTurn(Creature creature) {
         creature.endOfTurn();
     }
@@ -105,9 +105,7 @@ class Battle {
         return creature.getEffectiveSpeed();
     }
 
-    // WHAT CHANGED? removed the difficulty based if else logic from Battle
-    // the selected RivalStategy now decides which action the rival performs
-    // follows strategy pattern
+    // respective difficulty choice is implemented through strategy
     private int chooseRivalAction() {
         return rivalStrategy.chooseAction(rival, player, random);
     }

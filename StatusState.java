@@ -1,6 +1,11 @@
 import java.util.Random;
-// ---- apply state pattern: defines the bahavior od each status state ----
-// WHAT CHANGED? created a common interface for the different status states
+/**
+ * interface allows different 
+ * 
+ * 
+ * 
+ * 
+ **/
 // allows each states to have its own behavior while Creature interacts with them through the same interface
 
 public interface StatusState{
